@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: loadbalancer-my-nginx
+  namespace: networking-example
+  labels:
+    run: my-nginx
+spec:
+  # assign an external LoadBalancer to this service
+  # no LB are assigned on minikube, you need to run this in the cloud
+  type: LoadBalancer
+  ports:
+    - port: 80 # service port
+      targetPort: 80 # application port
+      protocol: TCP
+      name: web
+  selector:
+    run: my-nginx
+
+# Internet / "Cloud" LoadBalancer :80 ->  NodePort:3xxxx -> Target Pod(s) :80
+
+# Aufbau / Struktur auf Bare-Metal Systemen
+#
+# Einfaches Beispiel (nicht Best-Practice)
+#      Externer Server
+#      HAProxy -> Port 80 eingehend -> Port 3XXXX (auf alle Cluster Nodes verteilt)
+
+# Erweitertes Beispiel (Best-Practice)
+#      Externer Server
+#      HAProxy -> HealthCheck definiert (3XXXXX) -> (Nur "eine" Node bekommt Status healthy zurück)
+#              -> Port 80 eingehend -> Port 3XXXX (auf alle Healthy Cluster Nodes verteilt)

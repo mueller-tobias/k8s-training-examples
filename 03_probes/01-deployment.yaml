@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: probe-example
+  namespace: probes
+  labels:
+    app: nginx
+spec:
+  # Set strategy "Recreate" to ignore liveness/readiness failure checks
+  strategy:
+    type: Recreate
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+        # name of the container
+        - name: nginx
+          # image and tag (dont use :latest in production)
+          image: nginx:latest
+          # readiness probe of the container
+          readinessProbe:
+            # probe type
+            httpGet:
+              path: /
+              port: 80
+              scheme: HTTP
+            # wait X seconds before first check
+            initialDelaySeconds: 3
+            # check every X seconds
+            periodSeconds: 5
+            # mark as failed after X failed checks
+            failureThreshold: 3
+            # mark as success after X checks
+            successThreshold: 1
+            # timeout for the requests (in this case httpRequest on /)
+            timeoutSeconds: 1
+          # liveness probe of the container
+          livenessProbe:
+            # liveness type and config
+            httpGet:
+              path: /
+              port: 80
+              scheme: HTTP
+            initialDelaySeconds: 0
+            periodSeconds: 5
+            failureThreshold: 1
+            successThreshold: 1
+          # assigned resources to this container
+          resources:
+            # resource request (used for sheduling and resource calculation)
+            requests:
+              cpu: 100m
+              memory: 50Mi
+            # hard limits
+            limits:
+              cpu: 200m
+              memory: 100Mi
+          # container ports
+          ports:
+            - containerPort: 80
+              name: web
+              protocol: TCP

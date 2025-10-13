@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-nginx
+  namespace: networking-example
+spec:
+  selector:
+    matchLabels:
+      run: my-nginx
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        run: my-nginx
+    spec:
+      containers:
+        - name: my-nginx
+          image: nginx
+          resources:
+            requests:
+              memory: 10Mi
+              cpu: 5m
+            limits: {}
+          ports:
+            - containerPort: 80
+              name: web

@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: single-value-test
+  namespace: config-example
+spec:
+  restartPolicy: Never
+  containers:
+    - name: test-container
+      image: k8s.gcr.io/busybox
+      resources:
+        limits:
+          cpu: 100m
+          memory: 100Mi
+      command: ["/bin/sh", "-c", "env"]
+      env:
+        - name: TZ
+          value: Europe/Berlin
+        # Define the environment variable
+        - name: DEBUG
+          valueFrom:
+            configMapKeyRef:
+              # The ConfigMap containing the value you want to assign to MY_ENV_VARIABLE
+              name: test-config
+              # Specify the key associated with the value
+              key: debug
+        - name: ERROR_REPORTING
+          valueFrom:
+            configMapKeyRef:
+              name: test-config
+              key: errorReporting
+        - name: TEST_CONFIG_KEY
+          valueFrom:
+            configMapKeyRef:
+              key: testConfigKey
+              name: test-config
+              # Allow env-variable to be optional - By default variables are always required
+              optional: true

@@ -1,0 +1,17 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pi
+spec:
+  completions: 1
+  parallelism: 1
+  backoffLimit: 4
+  suspend: false
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: pi
+          imagePullPolicy: IfNotPresent
+          image: perl:threaded-stretch
+          command: ["perl", "-Mbignum=bpi", "-wle", "print bpi(2000)"]

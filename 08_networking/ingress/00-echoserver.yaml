@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ingress-example
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: echoserver-deployment
+  namespace: ingress-example
+spec:
+  selector:
+    matchLabels:
+      run: echoserver
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: echoserver
+    spec:
+      containers:
+        - name: echoserver
+          resources: {}
+          image: ealen/echo-server
+          ports:
+            - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: echoserver
+  namespace: ingress-example
+  labels:
+    run: echoserver
+spec:
+  ports:
+    - port: 8080
+      targetPort: 80
+      protocol: TCP
+      name: web
+  selector:
+    run: echoserver

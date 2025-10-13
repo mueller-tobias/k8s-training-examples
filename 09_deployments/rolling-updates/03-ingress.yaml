@@ -1,0 +1,18 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: demo-app
+  namespace: rolling-updates
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: rollingupdates.127-0-0-1.nip.io
+      http:
+        paths:
+          - pathType: Prefix
+            path: /
+            backend:
+              service:
+                name: demo-app
+                port:
+                  name: web

@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: all-values-test
+  namespace: config-example
+spec:
+  restartPolicy: Never
+  containers:
+    - name: test-container
+      image: k8s.gcr.io/busybox
+      resources: {}
+      command: ["/bin/sh", "-c", "env"]
+      # Do not use: No validity check for wrong or non existing key/values
+      # Use instead explicitely configured variables -> 02-use-single-value.yaml
+      envFrom:
+        - configMapRef:
+            name: test-config

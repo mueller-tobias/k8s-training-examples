@@ -1,0 +1,27 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: deployment-ingress-v2
+  namespace: rolling-updates
+  annotations:
+    nginx.ingress.kubernetes.io/canary: "true"
+    # Canary by header and/or header-value
+    nginx.ingress.kubernetes.io/canary-by-header: "x-version"
+    nginx.ingress.kubernetes.io/canary-by-header-value: "2"
+    # Canary shadow
+    # nginx.ingress.kubernetes.io/traffic-shadow: demo-app
+    # Canary percentage
+    # nginx.ingress.kubernetes.io/canary-weight: "25"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: rollingupdates.127-0-0-1.nip.io
+      http:
+        paths:
+          - pathType: Prefix
+            path: /
+            backend:
+              service:
+                name: demo-app-v2
+                port:
+                  name: web

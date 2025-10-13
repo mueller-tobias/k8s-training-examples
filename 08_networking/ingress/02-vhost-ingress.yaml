@@ -1,0 +1,27 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: vhost-ingress
+  namespace: ingress-example
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: 127-0-0-1.nip.io
+      http:
+        paths:
+          - pathType: Exact
+            path: /sitemap.xml
+            backend:
+              service:
+                name: sitemapservice
+                port:
+                  name: web
+          - pathType: Prefix
+            path: /
+            backend:
+              service:
+                name: echoserver
+                port:
+                  name: web
+                  # you can also use port->number instead of (servicePort) name
+                  # number: 8080

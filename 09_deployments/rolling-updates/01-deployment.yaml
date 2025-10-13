@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    run: demo-app
+  name: demo-app
+  namespace: rolling-updates
+spec:
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      run: demo-app
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+  template:
+    metadata:
+      labels:
+        run: demo-app
+    spec:
+      terminationGracePeriodSeconds: 30
+      containers:
+        - image: argoproj/rollouts-demo:blue
+          name: demo-app
+          resources:
+            limits: {}
+          ports:
+            - containerPort: 8080
+              name: web
+          readinessProbe:
+            initialDelaySeconds: 15
+            timeoutSeconds: 1
+            periodSeconds: 5
+            httpGet:
+              port: 8080
+              path: /
+          livenessProbe:
+            initialDelaySeconds: 15
+            timeoutSeconds: 1
+            periodSeconds: 5
+            httpGet:
+              port: 8080
+              path: /
+
+
+# Revision 1       -> Revision 2       -> Revision 3 -> "Rollback"
+#                          Revision 4  <-
+
+
+# Version 1 (blue) -> Version 2 (green) -> Version 3 (black)

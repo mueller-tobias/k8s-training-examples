@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nodeport-my-nginx
+  namespace: networking-example
+  labels:
+    run: my-nginx
+spec:
+  # opens a defined port on EVERY node in the cluster (range: 30000-32767)
+  type: NodePort
+  # externalTrafficPolicy: Local | Cluster (default)
+  # @see https://www.asykim.com/blog/deep-dive-into-kubernetes-external-traffic-policies
+  ports:
+    - port: 80
+      targetPort: 80
+      nodePort: 32730 # if not defined, kubernetes will automatically assign a free NodePort
+      protocol: TCP
+      name: web
+  selector:
+    run: my-nginx

@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-nginx
+  namespace: networking-example
+spec:
+  # type of the service (default ClusterIP)
+  type: ClusterIP
+  # ports assigned to this service
+  ports:
+    - port: 80
+      protocol: TCP
+      name: web
+  # selector for the assigned pods
+  selector:
+    run: my-nginx

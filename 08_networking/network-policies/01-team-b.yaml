@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: team-b
+  labels:
+    name: team-b
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: tb
+  namespace: team-b
+  labels:
+    app: tb
+spec:
+  containers:
+    - name: nginx
+      image: joshrosso/nginx-curl:v2
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tb
+  namespace: team-b
+spec:
+  selector:
+    app: tb
+  ports:
+  - port: 80
+    targetPort: 80
