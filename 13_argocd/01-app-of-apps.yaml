@@ -5,7 +5,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: training-root
-  namespace: argocd
+  namespace: infra-argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
@@ -18,7 +18,7 @@ spec:
       recurse: false
   destination:
     server: https://kubernetes.default.svc
-    namespace: argocd
+    namespace: infra-argocd
   syncPolicy:
     automated:
       prune: true

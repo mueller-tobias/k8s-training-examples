@@ -3,7 +3,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: debug-readiness-fails
-  namespace: argocd
+  namespace: infra-argocd
 spec:
   project: training
   source:

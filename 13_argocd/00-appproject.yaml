@@ -2,7 +2,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
   name: training
-  namespace: argocd
+  namespace: infra-argocd
 spec:
   description: Lindner k8s training examples
   sourceRepos:
