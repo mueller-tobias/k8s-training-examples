@@ -12,8 +12,6 @@ metadata:
     case: pending
 spec:
   # impossible nodeSelector — no node will match
-  nodeSelector:
-    disktype: unobtanium
   containers:
     - name: app
       image: nginx:1.27-alpine
