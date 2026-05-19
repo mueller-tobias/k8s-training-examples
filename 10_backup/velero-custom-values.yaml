@@ -1,0 +1,130 @@
+configMaps:
+  volume-policy-skip-unnecessary-things:
+    data:
+      resource_policy.yaml: |-
+        version: v1
+        volumePolicies:
+          - conditions:
+              volumeTypes: [emptyDir, downwardAPI, configmap, secret, hostPath, ephemeral]
+            action:
+              type: skip
+    labels:
+      app.kubernetes.io/managed-by: argocd-baseline-helm
+configuration:
+  backupStorageLocation:
+    - accessMode: ReadWrite
+      bucket: velero-demo-bader
+      config:
+        checksumAlgorithm: ''
+        region: eu-central-1
+        s3Url: https://s3.eu-central-1.ionoscloud.com
+      default: true
+      name: s3-backup
+      prefix: velero
+      provider: aws
+  features: EnableCSI
+  volumeSnapshotLocation:
+    - config:
+        checksumAlgorithm: ''
+        region: de
+      name: s3-snapshot
+      provider: aws
+credentials:
+  extraEnvVars: {}
+  extraSecretRef: ''
+  name: velero-s3-credentials
+  secretContents:
+    cloud: >
+      [default]
+      aws_access_key_id=EAAAAAG7qKkOvcZLFo9uzhLL0NllTUKMTpYQVZC8suXIUYXhwgEo7XAB9FAQAAAAAAH0UBD_MCgwzCys3y8LkfH1VT8X
+      aws_secret_access_key=LXD/xVDVpl9mjJ7Ax4qy9Q0B3gVUirIEOF7vFUWE5gLBptbcXS4AMKnP76RQvM7j
+  useSecret: true
+deployNodeAgent: true
+initContainers:
+  - image: velero/velero-plugin-for-aws:v1.2.1
+    imagePullPolicy: IfNotPresent
+    name: velero-plugin-for-aws
+    volumeMounts:
+      - mountPath: /target
+        name: plugins
+metrics:
+  enabled: false
+  prometheusRule:
+    additionalLabels:
+      k8s.adfinis.com/prometheus: kube-prometheus
+    enabled: true
+    spec:
+      - alert: VeleroBackupPartialFailures
+        annotations:
+          message: >-
+            Velero backup {{ $labels.schedule }} has {{ $value |
+            humanizePercentage }} partially failed backups.
+        expr: >-
+          # An alert will be triggered as warning as soon as one partial
+          backup will fail
+
+          increase(velero_backup_partial_failure_total{schedule!=""}[1d])
+          / increase(velero_backup_attempt_total{schedule!=""}[1d]) > 0
+        for: 15m
+        labels:
+          severity: warning
+      - alert: VeleroBackupFailures
+        annotations:
+          message: >-
+            Velero backup {{ $labels.schedule }} has {{ $value |
+            humanizePercentage }} failed backups.
+        expr: >-
+          # An alert will be triggered as warning as soon as one backup
+          will fail
+
+          increase(velero_backup_failure_total{schedule!=""}[1d]) /
+          increase(velero_backup_attempt_total{schedule!=""}[1d]) > 0
+        for: 15m
+        labels:
+          severity: warning
+      - alert: VeleroBackupLongerThanScheduled
+        annotations:
+          message: Velero backup has not run since one day.
+        expr: >-
+          # An alert will be triggered as warning as soon as the last
+          successful backup is over the backup schedule period
+
+          time() - max(velero_backup_last_successful_timestamp) > 12 * 60
+          * 60
+        for: 1h
+        labels:
+          severity: warning
+      - alert: VeleroBackupCritical
+        annotations:
+          message: Velero backup has not run since 4 days.
+        expr: >-
+          # An alert will be triggered as critical as soon as the last
+          successful backup is over 4 days
+
+          time() - max(velero_backup_last_successful_timestamp) > 24 * 60
+          * 60 * 4
+        for: 1h
+        labels:
+          severity: critical
+  serviceMonitor:
+    additionalLabels:
+      k8s.adfinis.com/prometheus: kube-prometheus
+    enabled: false
+schedules:
+  twice-daily-backup:
+    schedule: 0 */12 * * *
+    skipImmediately: false
+    template:
+      defaultVolumesToFsBackup: true
+      includeClusterResources: true
+      includedNamespaces:
+        - '*'
+      includedResources:
+        - '*'
+      itemOperationTimeout: 6h0s
+      resourcePolicy:
+        kind: configmap
+        name: velero-volume-policy-skip-unnecessary-things
+      snapshotVolumes: true
+      storageLocation: s3-backup
+      ttl: 240h0m0s

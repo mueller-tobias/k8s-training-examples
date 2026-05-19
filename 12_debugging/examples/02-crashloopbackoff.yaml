@@ -1,0 +1,22 @@
+# Symptom: CrashLoopBackOff
+# Cause: container exits with code != 0, kubelet restarts with backoff.
+# Inspect:
+#   kubectl -n example-debugging logs crashloopbackoff --previous
+#   kubectl -n example-debugging describe pod crashloopbackoff
+apiVersion: v1
+kind: Pod
+metadata:
+  name: crashloopbackoff
+  namespace: example-debugging
+  labels:
+    case: crashloopbackoff
+spec:
+  containers:
+    - name: app
+      image: busybox:1.36
+      command: ["sh", "-c"]
+      args:
+        - |
+          echo "boot at $(date)"
+          echo "missing REQUIRED_ENV — aborting" >&2
+          exit 1

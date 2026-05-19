@@ -1,0 +1,47 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kubectl-admin-sa
+  namespace: __NAMESPACE__
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: kubectl-admin-binding-__NAMESPACE__
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: kubectl-admin-sa
+  namespace: __NAMESPACE__
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kubectl-admin-deployment
+  namespace: __NAMESPACE__
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kubectl-admin
+  template:
+    metadata:
+      labels:
+        app: kubectl-admin
+    spec:
+      serviceAccountName: kubectl-admin-sa
+      volumes:
+      - name: schulung-data-volume
+        hostPath:
+          path: __HOST_PATH_DIR__
+          type: DirectoryOrCreate
+      containers:
+      - name: kubectl-shell
+        image: nixery.dev/shell/git/kubectl/vim
+        command: ["/bin/sh", "-c", "tail -f /dev/null"]
+        volumeMounts:
+        - name: schulung-data-volume
+          mountPath: /schulung

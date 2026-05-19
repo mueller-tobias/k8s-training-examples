@@ -8,12 +8,13 @@ spec:
       app: db # has to match .spec.template.metadata.labels
   serviceName: db
   replicas: 3
+  podManagementPolicy: OrderedReady
   template:
     metadata:
       labels:
         app: db # has to match .spec.selector.matchLabels
     spec:
-      terminationGracePeriodSeconds: 60
+      terminationGracePeriodSeconds: 31
       containers:
         - name: nginx
           image: nginx:alpine

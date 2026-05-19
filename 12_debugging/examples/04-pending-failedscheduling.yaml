@@ -1,0 +1,24 @@
+# Symptom: Pending / FailedScheduling
+# Cause: no node satisfies requests + nodeSelector.
+# Inspect:
+#   kubectl -n example-debugging describe pod pending-failedscheduling
+#   Events: "0/N nodes are available: ... Insufficient memory / didn't match node selector"
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pending-failedscheduling
+  namespace: example-debugging
+  labels:
+    case: pending
+spec:
+  # impossible nodeSelector — no node will match
+  nodeSelector:
+    disktype: unobtanium
+  containers:
+    - name: app
+      image: nginx:1.27-alpine
+      resources:
+        requests:
+          # absurd request — even without nodeSelector, no node has 999Gi
+          memory: "999Gi"
+          cpu: "100"

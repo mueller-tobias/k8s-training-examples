@@ -7,6 +7,7 @@ metadata:
   namespace: rolling-updates
 spec:
   revisionHistoryLimit: 10
+  replicas: 20
   selector:
     matchLabels:
       run: demo-app
@@ -31,7 +32,7 @@ spec:
               name: web
           readinessProbe:
             initialDelaySeconds: 15
-            timeoutSeconds: 1
+            timeoutSeconds: 5
             periodSeconds: 5
             httpGet:
               port: 8080

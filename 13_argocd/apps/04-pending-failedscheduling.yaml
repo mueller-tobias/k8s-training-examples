@@ -1,0 +1,22 @@
+# Demo: Pod stuck Pending. ArgoCD shows "Progressing" forever -> investigate events.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: debug-pending-failedscheduling
+  namespace: argocd
+spec:
+  project: training
+  source:
+    repoURL: https://github.com/mueller-tobias/k8s-training-examples.git
+    targetRevision: main
+    path: 12_debugging/examples
+    directory:
+      recurse: false
+      include: '04-pending-failedscheduling.yaml'
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: example-debugging
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

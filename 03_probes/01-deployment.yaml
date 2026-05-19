@@ -8,8 +8,8 @@ metadata:
 spec:
   # Set strategy "Recreate" to ignore liveness/readiness failure checks
   strategy:
-    type: Recreate
-  replicas: 1
+    type: RollingUpdate
+  replicas: 3
   selector:
     matchLabels:
       app: nginx
@@ -31,7 +31,7 @@ spec:
               port: 80
               scheme: HTTP
             # wait X seconds before first check
-            initialDelaySeconds: 3
+            initialDelaySeconds: 4
             # check every X seconds
             periodSeconds: 5
             # mark as failed after X failed checks

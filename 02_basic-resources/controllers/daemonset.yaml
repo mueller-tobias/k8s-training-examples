@@ -21,7 +21,7 @@ spec:
           effect: NoSchedule
       containers:
         - name: fluentd-elasticsearch
-          image: docker.io/bitnami/fluentd:1.15.3-debian-11-r11
+          image: docker.io/bitnamilegacy/fluentd:1.15.3-debian-11-r11
           resources:
             limits:
               memory: 200Mi

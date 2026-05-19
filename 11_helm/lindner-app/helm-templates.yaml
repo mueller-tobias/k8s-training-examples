@@ -1,0 +1,143 @@
+---
+# Source: lindner-app/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: dev-app-lindner-app
+  labels:
+    helm.sh/chart: lindner-app-0.1.0
+    app.kubernetes.io/name: lindner-app
+    app.kubernetes.io/instance: dev-app
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+automountServiceAccountToken: true
+---
+# Source: lindner-app/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: dev-app-lindner-app
+  labels:
+    helm.sh/chart: lindner-app-0.1.0
+    app.kubernetes.io/name: lindner-app
+    app.kubernetes.io/instance: dev-app
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: lindner-app
+    app.kubernetes.io/instance: dev-app
+---
+# Source: lindner-app/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dev-app-lindner-app
+  labels:
+    helm.sh/chart: lindner-app-0.1.0
+    app.kubernetes.io/name: lindner-app
+    app.kubernetes.io/instance: dev-app
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: lindner-app
+      app.kubernetes.io/instance: dev-app
+  template:
+    metadata:
+      labels:
+        helm.sh/chart: lindner-app-0.1.0
+        app.kubernetes.io/name: lindner-app
+        app.kubernetes.io/instance: dev-app
+        app.kubernetes.io/version: "1.16.0"
+        app.kubernetes.io/managed-by: Helm
+    spec:
+      serviceAccountName: dev-app-lindner-app
+      containers:
+        - name: lindner-app
+          image: "nginx:1.16.0"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+---
+# Source: lindner-app/templates/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: dev-app-lindner-app
+  labels:
+    helm.sh/chart: lindner-app-0.1.0
+    app.kubernetes.io/name: lindner-app
+    app.kubernetes.io/instance: dev-app
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  tls:
+    - hosts:
+        - "chart-example.local"
+      secretName: chart-example2-tls
+    - hosts:
+        - "chart-example.de"
+      secretName: chart-example-tls
+  rules:
+    - host: "chart-example.local"
+      http:
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: dev-app-lindner-app
+                port:
+                  number: 80
+    - host: "chart-example.de"
+      http:
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: dev-app-lindner-app
+                port:
+                  number: 80
+---
+# Source: lindner-app/templates/tests/test-connection.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "dev-app-lindner-app-test-connection"
+  labels:
+    helm.sh/chart: lindner-app-0.1.0
+    app.kubernetes.io/name: lindner-app
+    app.kubernetes.io/instance: dev-app
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['dev-app-lindner-app:80']
+  restartPolicy: Never

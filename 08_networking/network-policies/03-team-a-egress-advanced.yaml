@@ -24,10 +24,16 @@ spec:
       # endPort: 3000
   - to:
     - ipBlock:
-        cidr: 100.96.0.0/11
+        cidr: 10.42.0.0/16
     ports:
     - protocol: UDP
       port: 53
+  - to:
+    - ipBlock:
+        cidr: 10.8.5.25/32
+    ports:
+    - protocol: TCP
+      port: 443
   ingress:
   - from:
     - namespaceSelector:

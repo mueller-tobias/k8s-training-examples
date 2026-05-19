@@ -1,0 +1,25 @@
+# App-of-Apps: deploys every Application under 13_argocd/apps/
+# kubectl apply -f 00-appproject.yaml
+# kubectl apply -f 01-app-of-apps.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: training-root
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: training
+  source:
+    repoURL: https://github.com/mueller-tobias/k8s-training-examples.git
+    targetRevision: main
+    path: 13_argocd/apps
+    directory:
+      recurse: false
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

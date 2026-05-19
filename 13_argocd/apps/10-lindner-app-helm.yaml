@@ -1,0 +1,25 @@
+# Demo: Helm-sourced Application. Sync hooks, diff between values vs live, etc.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: lindner-app
+  namespace: argocd
+spec:
+  project: training
+  source:
+    repoURL: https://github.com/mueller-tobias/k8s-training-examples.git
+    targetRevision: main
+    path: 11_helm/lindner-app
+    helm:
+      releaseName: lindner-app
+      valueFiles:
+        - values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: lindner-app
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

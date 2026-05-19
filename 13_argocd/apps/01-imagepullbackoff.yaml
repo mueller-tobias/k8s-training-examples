@@ -1,0 +1,23 @@
+# Demo: ArgoCD shows Synced but Degraded (pod ImagePullBackOff).
+# Troubleshoot in UI: App -> Resource tree -> Pod -> Events / Logs tab.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: debug-imagepullbackoff
+  namespace: argocd
+spec:
+  project: training
+  source:
+    repoURL: https://github.com/mueller-tobias/k8s-training-examples.git
+    targetRevision: main
+    path: 12_debugging/examples
+    directory:
+      recurse: false
+      include: '01-imagepullbackoff.yaml'
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: example-debugging
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

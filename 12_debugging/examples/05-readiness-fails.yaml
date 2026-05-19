@@ -1,0 +1,42 @@
+# Symptom: Readiness probe fails
+# Cause: probe path does not exist on the container -> pod Running but NotReady,
+#        Service does not route traffic to it.
+# Inspect:
+#   kubectl -n example-debugging get pod readiness-fails -o wide
+#   kubectl -n example-debugging describe pod readiness-fails
+#   Events: "Readiness probe failed: HTTP probe failed with statuscode: 404"
+#   kubectl -n example-debugging get endpoints readiness-fails  # empty
+apiVersion: v1
+kind: Pod
+metadata:
+  name: readiness-fails
+  namespace: example-debugging
+  labels:
+    app: readiness-fails
+    case: readiness
+spec:
+  containers:
+    - name: app
+      image: nginx:1.27-alpine
+      ports:
+        - containerPort: 80
+      readinessProbe:
+        httpGet:
+          # /healthz does not exist in default nginx -> 404 -> never Ready
+          path: /healthz
+          port: 80
+        initialDelaySeconds: 2
+        periodSeconds: 5
+        failureThreshold: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: readiness-fails
+  namespace: example-debugging
+spec:
+  selector:
+    app: readiness-fails
+  ports:
+    - port: 80
+      targetPort: 80

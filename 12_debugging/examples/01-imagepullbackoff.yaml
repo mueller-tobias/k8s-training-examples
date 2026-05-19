@@ -1,0 +1,15 @@
+# Symptom: ImagePullBackOff
+# Cause: image tag does not exist in registry.
+# Inspect:   kubectl -n example-debugging describe pod imagepullbackoff
+# Events show: "Failed to pull image ... not found"
+apiVersion: v1
+kind: Pod
+metadata:
+  name: imagepullbackoff
+  namespace: example-debugging
+  labels:
+    case: imagepullbackoff
+spec:
+  containers:
+    - name: app
+      image: nginx:this-tag-does-not-exist-123

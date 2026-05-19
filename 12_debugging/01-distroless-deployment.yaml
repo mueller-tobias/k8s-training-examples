@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: distroless-app
+  namespace: debugging
+  labels:
+    app: distroless-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: distroless-app
+  template:
+    metadata:
+      labels:
+        app: distroless-app
+    spec:
+      containers:
+        # Distroless = no shell, no busybox, no package manager, no `ps`, no `curl`.
+        # `kubectl exec -it ... -- sh`  ->  "exec: \"sh\": executable file not found in $PATH"
+        # This forces use of `kubectl debug` with an ephemeral container.
+        - name: app
+          # Python distroless ships only the python3 runtime + libc, nothing else.
+          image: gcr.io/distroless/python3-debian12:nonroot
+          # Tiny HTTP server so the pod stays Running and we have something to poke at.
+          command: ["python3"]
+          args:
+            - "-m"
+            - "http.server"
+            - "8080"
+          ports:
+            - containerPort: 8080
+              name: http
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: distroless-app
+  namespace: debugging
+spec:
+  selector:
+    app: distroless-app
+  ports:
+    - port: 80
+      targetPort: http
